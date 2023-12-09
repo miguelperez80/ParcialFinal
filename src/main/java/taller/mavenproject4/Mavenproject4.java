@@ -1,5 +1,3 @@
-
-
 package taller.mavenproject4;
 
 import com.google.gson.Gson;
@@ -162,7 +160,7 @@ if (lectorConMulta != null) {
             return gson.toJson(prestamos);
         });
 
-        Spark.post("/calcularprestamo", (req, res) -> {
+        Spark.post("/nuevoprestamo", (req, res) -> {
             res.type("application/json");
 
             Prestamo prestamoRequest = gson.fromJson(req.body(), Prestamo.class);
@@ -196,7 +194,7 @@ if (lectorConMulta != null) {
     try {
         int idLector = Integer.parseInt(req.params(":idLector"));
 
-        
+        int valor=5000;
         Lector lectorSeleccionado = obtenerLectorPorId(idLector, lectores);
 
         if (lectorSeleccionado != null) {
@@ -212,22 +210,24 @@ if (lectorConMulta != null) {
 
             
             JsonArray multasJson = new JsonArray();
-
+            
             if (multasLector.isEmpty()) {
                 
                 lectorConMultaJson.addProperty("mensaje", "No hay multas para el ID registrado.");
             } else {
                
-                lectorConMultaJson.addProperty("mensaje", "Tiene multas.");
+                lectorConMultaJson.addProperty("mensaje", "Tiene multas ,debe:."+valor);
 
                 for (Multa multa : multasLector) {
                     JsonObject multaJson = new JsonObject();
                     multaJson.addProperty("id", multa.getId());
                     multaJson.addProperty("fechaInicio", multa.getFechaInicio());
                     multaJson.addProperty("fechaFin", multa.getFechaFin());
+                    
                    
 
                     multasJson.add(multaJson);
+                    valor=valor*2;
                 }
             }
 
@@ -276,34 +276,48 @@ if (lectorConMulta != null) {
         return contadorPrestamo.getAndIncrement();
     }
 
-   private static void calcularMulta(Prestamo prestamo, List<Multa> multas) {
-    LocalDate fechaActual = LocalDate.now();
-    int mesActual = fechaActual.getMonthValue();
+   private static String calcularMulta(Prestamo prestamo, List<Multa> multas) {
+        LocalDate fechaActual = LocalDate.now();
+        int mesActual = fechaActual.getMonthValue();
 
-    if (prestamo.getFechaFin() < mesActual) {
-        
-        int mesesDeRetraso = mesActual - prestamo.getFechaFin();
+        if (prestamo.getFechaFin() < mesActual) {
+            int mesesDeRetraso = mesActual - prestamo.getFechaFin();
+            Lector lectorMulta = prestamo.getLector();
+            Prestamo prestamoMulta = prestamo;
+            LocalDate fechaInicioMulta = obtenerFechaActual();
+            LocalDate fechaFinMulta = obtenerFechaFinMulta(fechaInicioMulta, mesesDeRetraso);
 
-        
-        Lector lectorMulta = prestamo.getLector();
-        Prestamo prestamoMulta = prestamo;
+            // Crear la nueva multa
+            Multa multaGenerada = nuevaMulta(
+                    generarIdMulta(),
+                    fechaInicioMulta.getDayOfMonth(),
+                    fechaFinMulta.getDayOfMonth(),
+                    lectorMulta,
+                    prestamoMulta
+            );
 
-        
-        LocalDate fechaInicioMulta = obtenerFechaActual();
-        LocalDate fechaFinMulta = obtenerFechaFinMulta(fechaInicioMulta, mesesDeRetraso);
+            // Calcular el valor a pagar
+            double valorPorMesDeRetraso = 5.0; // Puedes ajustar este valor según tus necesidades
+            double valorAPagar = valorPorMesDeRetraso * mesesDeRetraso;
 
-        
-        Multa multaGenerada = nuevaMulta(
-                generarIdMulta(),
-                fechaInicioMulta.getDayOfMonth(), 
-                fechaFinMulta.getDayOfMonth(),  
-                lectorMulta,
-                prestamoMulta
-        );
+            // Establecer el valor a pagar usando el método setter
+            multaGenerada.setValorAPagar(valorAPagar);
 
-        multas.add(multaGenerada);
+            multas.add(multaGenerada);
+
+            // Crear un objeto JSON para representar la nueva multa
+            JsonObject nuevaMultaJson = new JsonObject();
+            nuevaMultaJson.addProperty("id", multaGenerada.getId());
+            nuevaMultaJson.addProperty("fechaInicio", multaGenerada.getFechaInicio());
+            nuevaMultaJson.addProperty("fechaFin", multaGenerada.getFechaFin());
+            nuevaMultaJson.addProperty("valorAPagar", multaGenerada.getValorAPagar());
+
+            // Convertir el objeto JSON a una cadena y devolverla
+            return gson.toJson(nuevaMultaJson);
+        }
+
+        return ""; // Devolver una cadena vacía si no se genera la multa
     }
-}
 
 
     private static LocalDate obtenerFechaActual() {
@@ -356,4 +370,3 @@ if (lectorConMulta != null) {
     return null; 
 }
 }
-
