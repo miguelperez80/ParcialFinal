@@ -353,14 +353,14 @@ if (lectorConMulta != null) {
         }
         return null; // Retorna null si no se encuentra la copia con el ID especificado
     }
-     public static Lector obtenerLectorPorId(int idLector, List<Lector> lectores) {
-        for (Lector lector : lectores) {
-            if (lector.getIdentificador() == idLector) {
-                return lector;
-            }
+    public static Lector obtenerLectorPorId(int idLector, List<Lector> lectores) {
+    for (Lector lector : lectores) {
+        if (lector.getIdentificador() == idLector) {
+            return lector;
         }
-        return null; // Retorna null si no se encuentra el lector con el ID especificado
     }
+    return null; // Retorna null si no se encuentra el lector con el ID especificado
+}
      public static Multa obtenerMultaPorIdPrestamo(int idPrestamo, List<Multa> multas) {
     for (Multa multa : multas) {
         if (multa.getPrestamo().getId() == idPrestamo) {
@@ -370,3 +370,4 @@ if (lectorConMulta != null) {
     return null; 
 }
 }
+
