@@ -6,6 +6,8 @@ public class Multa {
     int id, fechaInicio, fechaFin;
     Lector lector;
     Prestamo prestamo;
+     private double valorAPagar;
+    
 
     public Multa(int id, int fechaInicio, int fechaFin, Lector lector, Prestamo prestamo) {
         this.id = id;
@@ -13,7 +15,15 @@ public class Multa {
         this.fechaFin = fechaFin;
         this.lector = lector;
         this.prestamo = prestamo;
+       
     }
+
+     
+
+    public void setValorAPagar(double valorAPagar) {
+        this.valorAPagar = valorAPagar;
+    }
+    
 
     public int getId() {
         return id;
@@ -53,6 +63,10 @@ public class Multa {
 
     public void setPrestamo(Prestamo prestamo) {
         this.prestamo = prestamo;
+    }
+
+    String getValorAPagar() {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
     
     
